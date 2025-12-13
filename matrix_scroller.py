@@ -138,14 +138,34 @@ def topToBottom(matrix):
         ledMatrixShow(matrix)
         time.sleep(.1)
 
+def fastLEDConversion(matrix):
+    convertedMatrix = copy.deepcopy(matrix)
+    for i in range(len(convertedMatrix)):
+        convertedMatrix[(i%8)*16 + i//8] = str(i)
+    return convertedMatrix
+
+def fastLEDShape(matrix):
+    tempMatrix = copy.deepcopy(matrix)
+    diamond = [48, 33, 65, 50]
+    for i in range(16):
+        for j in diamond:
+            tempMatrix[j + i] = '0'
+        ledMatrixShow(tempMatrix)
+        time.sleep(.4)
+        tempMatrix = copy.deepcopy(matrix)
+
 # Function for testing conversion methods
 def matrixOrderConversion():
     ledMatrix = []
+    convertedMatrix = []
     for i in range(128):
         ledMatrix.append('.')
+    convertedMatrix = fastLEDConversion(ledMatrix)
     ledMatrixShow(ledMatrix)
+    ledMatrixShow(convertedMatrix) # for visualization
+    #fastLEDShape(ledMatrix)
     #leftToRight(ledMatrix)
-    topToBottom(ledMatrix)
+    #topToBottom(ledMatrix)
 
 def main():
     #newLineTesting()
