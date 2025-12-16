@@ -144,18 +144,63 @@ def fastLEDConversion(matrix):
         convertedMatrix[(i%8)*16 + i//8] = str(i)
     return convertedMatrix
 
-def fastLEDShape(matrix):
+diamond = [48, 33, 65, 50]
+pixelH = [16, 17, 20, 21, 32, 33, 36, 37, 48, 49, 50, 51, 52, 53, 64, 65, 68, 69, 80, 81, 84, 85, 96, 97, 100, 101]
+def fastLEDShape(matrix, shape):
     tempMatrix = copy.deepcopy(matrix)
-    diamond = [48, 33, 65, 50]
-    for i in range(16):
-        for j in diamond:
-            tempMatrix[j + i] = '0'
+    #for i in range(16 + 7):        # Forwards
+    for i in range(15 + 7, -1, -1): # Backwards
+        for j in shape:
+            if (not ((j % 16)-6 + i < 0)) and ((j % 16) - 6 + i < 16):
+                tempMatrix[j - 6 + i] = '0'
         ledMatrixShow(tempMatrix)
         time.sleep(.4)
         tempMatrix = copy.deepcopy(matrix)
 
+'''
+This will more than likely be the version I translate to the appropriate language for project
+Still requires further development; maybe helper functions to make it cleaner and remove test/debug code
+
+While loop version of the previous fastLEDShape method. The original works for only one character
+at a time, while this one works for as many as there are in a list.
+'''
+def fastLEDShapeWhile(matrix, shapes):
+    tempMatrix = copy.deepcopy(matrix)
+    # The count is just for testing adding more letters
+    count = 0
+    testLetter = copy.deepcopy(pixelH)
+    testLetter.insert(0, 22)
+    testLetter2 = copy.copy(testLetter)
+    delFlag = False
+
+    # The first value in each shape list will be a tracker for where to print it in the final matrix
+    while len(shapes) > 0:
+        for letter in shapes:
+            for pixel in range(len(letter) - 1):
+                if (not ((letter[pixel + 1] % 16) -6 + letter[0] < 0)) and ((letter[pixel + 1] % 16) - 6 + letter[0] < 16):
+                    tempMatrix[letter[pixel + 1] - 6 + letter[0]] = '0'
+            letter[0] -= 1
+            if letter[0] < 0:
+                # I orignally had del remove the character in this comparison, but that caused a bug
+                # where it would print an empty matrix even though there was another item, so I'm
+                # assuming it causes a break in the for loop for some reason. Maybe this bug won't 
+                # happen in the other language.
+                delFlag = True
+        ledMatrixShow(tempMatrix)
+        time.sleep(.4)
+        tempMatrix = copy.deepcopy(matrix)
+        count += 1
+        if count == 7:
+            shapes.append(testLetter)
+        elif count == 14:
+            shapes.append(testLetter2)
+        if delFlag:
+            del shapes[0]
+            delFlag = False
+
 # Function for testing conversion methods
 def matrixOrderConversion():
+    pixelHtest = pixelH
     ledMatrix = []
     convertedMatrix = []
     for i in range(128):
@@ -163,7 +208,11 @@ def matrixOrderConversion():
     convertedMatrix = fastLEDConversion(ledMatrix)
     ledMatrixShow(ledMatrix)
     ledMatrixShow(convertedMatrix) # for visualization
-    #fastLEDShape(ledMatrix)
+    #fastLEDShape(ledMatrix, pixelH)
+    pixelHtest = [x + 22 for x in pixelHtest]
+    pixelHtest2 = copy.copy(pixelH)
+    pixelHtest2.insert(0, 22)
+    fastLEDShapeWhile(ledMatrix, [pixelHtest2])
     #leftToRight(ledMatrix)
     #topToBottom(ledMatrix)
 
