@@ -146,6 +146,23 @@ def fastLEDConversion(matrix):
 
 diamond = [48, 33, 65, 50]
 pixelH = [16, 17, 20, 21, 32, 33, 36, 37, 48, 49, 50, 51, 52, 53, 64, 65, 68, 69, 80, 81, 84, 85, 96, 97, 100, 101]
+pixelE = [16, 17, 18, 19, 20, 21, 32, 33, 48, 49, 50, 51, 52, 64, 65, 80, 81, 96, 97, 98, 99, 100, 101]
+pixelL = [16, 17, 32, 33, 48, 49, 64, 65, 80, 81, 96, 97, 98, 99, 100, 101]
+pixelO = [17, 18, 19, 20, 32, 33, 36, 37, 48, 49, 52, 53, 64, 65, 68, 69, 80, 81, 84, 85, 97, 98, 99, 100]
+pixelW = [16, 17, 21, 32, 33, 37, 48, 49, 51, 53, 64, 65, 66, 67, 68, 69, 80, 81, 82, 84, 85, 96, 97, 101]
+pixelR = [16, 17, 18, 19, 20, 32, 33, 36, 37, 48, 49, 52, 53, 64, 65, 66, 67, 68, 80, 81, 84, 85, 96, 97, 100, 101]
+pixelD = [16, 17, 18, 19, 20, 32, 33, 36, 37, 48, 49, 52, 53, 64, 65, 68, 69, 80, 81, 84, 85, 96, 97, 98, 99, 100]
+
+pixelLetters = {
+    "H": pixelH,
+    "E": pixelE,
+    "L": pixelL,
+    "O": pixelO,
+    "W": pixelW,
+    "R": pixelR,
+    "D": pixelD
+}
+
 def fastLEDShape(matrix, shape):
     tempMatrix = copy.deepcopy(matrix)
     #for i in range(16 + 7):        # Forwards
@@ -198,6 +215,41 @@ def fastLEDShapeWhile(matrix, shapes):
             del shapes[0]
             delFlag = False
 
+def fastLEDText(matrix, text):
+    tempMatrix = copy.deepcopy(matrix)
+    tempLetters = []
+    count = 0
+    delFlag = False
+    addFlag = False
+
+    tempLetter = copy.copy(pixelLetters[text[0]])
+    tempLetter.insert(0, 22)
+    tempLetters.append(tempLetter)
+
+    while len(tempLetters) > 0:
+        for letter in tempLetters:
+            for pixel in range(len(letter) - 1):
+                if (not ((letter[pixel + 1] % 16) -6 + letter[0] < 0)) and ((letter[pixel + 1] % 16) - 6 + letter[0] < 16):
+                    tempMatrix[letter[pixel + 1] - 6 + letter[0]] = '0'
+            letter[0] -= 1
+            if letter[0] < 0:
+                delFlag = True
+        ledMatrixShow(tempMatrix)
+        time.sleep(.4)
+        tempMatrix = copy.deepcopy(matrix)
+        if delFlag:
+            del tempLetters[0]
+            delFlag = False
+        if len(tempLetters) > 0:
+            if tempLetters[-1][0] < 15:
+                count += 1
+                if (count < len(text) and (text[count] != " ")):
+                    tempLetter = copy.copy(pixelLetters[text[count]])
+                    tempLetter.insert(0, 22)
+                    tempLetters.append(tempLetter)
+            elif tempLetters[-1][0] < 14:
+                count += 1
+
 # Function for testing conversion methods
 def matrixOrderConversion():
     pixelHtest = pixelH
@@ -212,9 +264,10 @@ def matrixOrderConversion():
     pixelHtest = [x + 22 for x in pixelHtest]
     pixelHtest2 = copy.copy(pixelH)
     pixelHtest2.insert(0, 22)
-    fastLEDShapeWhile(ledMatrix, [pixelHtest2])
+    #fastLEDShapeWhile(ledMatrix, [pixelHtest2])
     #leftToRight(ledMatrix)
     #topToBottom(ledMatrix)
+    fastLEDText(ledMatrix, "HELLO WORLD")
 
 def main():
     #newLineTesting()
